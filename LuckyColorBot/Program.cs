@@ -21,18 +21,29 @@ namespace LuckyColorBot
 
             var image = creator.GetImage(color);
             var tmpName = Path.GetTempFileName();
-            var token = Tokens.Create(ck, cs, at, ats);
 
-            var sb = new StringBuilder();
-            sb.Append(DateTime.Now.ToShortDateString());
-            sb.Append("になりました。今日のラッキーカラーは16進数RGB表記で「# ");
-            sb.Append(color.ToHex());
-            sb.Append("」です。 #lucky_color");
+            try
+            {
+                var token = Tokens.Create(ck, cs, at, ats);
 
-            image.Save(tmpName);
-            var result = token.Media.Upload(media => new FileInfo(tmpName));
-            token.Statuses.Update(status => sb.ToString(), media_ids => result);
-            File.Delete(tmpName);
+                var sb = new StringBuilder();
+                sb.Append(DateTime.Now.ToShortDateString());
+                sb.Append("になりました。今日のラッキーカラーは16進数RGB表記で「# ");
+                sb.Append(color.ToHex());
+                sb.Append("」です。 #lucky_color");
+
+                image.Save(tmpName);
+                var result = token.Media.Upload(media => new FileInfo(tmpName));
+                token.Statuses.Update(status => sb.ToString(), media_ids => result);
+            }
+            catch (Exception e)
+            {
+                File.AppendAllText("error.log", DateTime.Now + ":" + e.Message + "\n");
+            }
+            finally
+            {
+                File.Delete(tmpName);
+            }
         }
     }
 }
